@@ -11,6 +11,7 @@ uvicorn = "^0.13.4"
 databases = "^0.4.3"
 asyncpg = "^0.22.0"
 psycopg2-binary = "^2.8.6"
+alembic = "^1.6.2"
 
 [tool.poetry.dev-dependencies]
 black = "^21.4b2"
