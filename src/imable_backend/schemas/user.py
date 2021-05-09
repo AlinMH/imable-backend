@@ -4,9 +4,9 @@ from fastapi_users import models
 
 
 class User(models.BaseUser):
-    first_name: str
-    last_name: str
-    description: Optional[str]
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    description: Optional[str] = None
 
 
 class UserCreate(models.BaseUserCreate):
