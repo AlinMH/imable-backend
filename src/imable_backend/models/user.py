@@ -7,4 +7,3 @@ from .base_model import Base
 class UserTable(Base, SQLAlchemyBaseUserTable):
     first_name = Column(String(length=40), nullable=False)
     last_name = Column(String(length=40), nullable=False)
-    description = Column(String(length=1000))
