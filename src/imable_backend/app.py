@@ -21,14 +21,6 @@ APP_SECRET = os.getenv("APP_SECRET")
 jwt_authentication = JWTAuthentication(secret=APP_SECRET, lifetime_seconds=3600, tokenUrl="/auth/jwt/login")
 
 app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 fastapi_users = FastAPIUsers(
     user_db,
     [jwt_authentication],
@@ -203,3 +195,12 @@ def remove_user_education(
         return
 
     session.commit()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
