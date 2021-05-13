@@ -2,14 +2,9 @@ from datetime import date
 from typing import Optional
 
 from fastapi_users import models
-from phonenumbers import (
-    NumberParseException,
-    PhoneNumberFormat,
-    PhoneNumberType,
-    format_number,
-    is_valid_number,
-    number_type,
-)
+from phonenumbers import (NumberParseException, PhoneNumberFormat,
+                          PhoneNumberType, format_number, is_valid_number,
+                          number_type)
 from phonenumbers import parse as parse_phone_number
 from pydantic import constr, validator
 
@@ -20,6 +15,24 @@ class User(models.BaseUser):
     phone_number: constr(max_length=50, strip_whitespace=True) = None
     location: Optional[str] = None
     birthdate: Optional[date] = None
+
+    # Abilities
+    creativity: Optional[bool] = False
+    analytic_thinking: Optional[bool] = False
+    communication: Optional[bool] = False
+    teamwork: Optional[bool] = False
+    adaptive: Optional[bool] = False
+
+    # Hobbies
+    walking: Optional[bool] = False
+    painting: Optional[bool] = False
+    video_games: Optional[bool] = False
+    reading: Optional[bool] = False
+    movies: Optional[bool] = False
+    writing: Optional[bool] = False
+    singing: Optional[bool] = False
+    music: Optional[bool] = False
+    audio_books: Optional[bool] = False
 
     @validator("phone_number")
     def check_phone_number(cls, v):

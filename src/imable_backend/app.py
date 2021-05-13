@@ -8,12 +8,18 @@ from sqlalchemy.orm import Session
 
 from .database.session import database, user_db
 from .deps import db_session
+from .models.disability import Disability as DisabilityModel
 from .models.education import Education as EducationModel
 from .models.experience import Experience as ExperienceModel
+from .models.language import Language as LanguageModel
+from .schemas.disability import Disability as DisabilitySchema
+from .schemas.disability import DisabilityDB
 from .schemas.education import Education as EducationSchema
 from .schemas.education import EducationDB
 from .schemas.experience import Experience as ExperienceSchema
 from .schemas.experience import ExperienceDB
+from .schemas.language import Language as LanguageSchema
+from .schemas.language import LanguageDB
 from .schemas.user import User, UserCreate, UserDB, UserUpdate
 
 APP_SECRET = os.getenv("APP_SECRET")
@@ -21,14 +27,6 @@ APP_SECRET = os.getenv("APP_SECRET")
 jwt_authentication = JWTAuthentication(secret=APP_SECRET, lifetime_seconds=3600, tokenUrl="/auth/jwt/login")
 
 app = FastAPI()
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 fastapi_users = FastAPIUsers(
     user_db,
     [jwt_authentication],
@@ -42,6 +40,9 @@ app.include_router(fastapi_users.get_register_router(), prefix="/auth", tags=["a
 app.include_router(fastapi_users.get_reset_password_router(APP_SECRET), prefix="/auth", tags=["auth"])
 app.include_router(fastapi_users.get_verify_router(APP_SECRET), prefix="/auth", tags=["auth"])
 app.include_router(fastapi_users.get_users_router(), prefix="/users", tags=["users"])
+app.add_middleware(
+    CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"]
+)
 
 
 @app.on_event("startup")
@@ -196,6 +197,129 @@ def remove_user_education(
 ):
     deleted = (
         session.query(EducationModel).filter(EducationModel.user_id == user.id).filter(EducationModel.id == id).delete()
+    )
+
+    if not deleted:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+
+    session.commit()
+
+
+@app.get("/user/language", tags=["language"], response_model=list[LanguageDB])
+def get_user_language(user: User = Depends(fastapi_users.current_user()), session: Session = Depends(db_session)):
+    languages = session.query(LanguageModel).filter(LanguageModel.user_id == user.id).all()
+    return [LanguageDB(id=lang.id, language=lang.language, level=lang.level.value) for lang in languages]
+
+
+@app.post("/user/language", tags=["language"], status_code=status.HTTP_201_CREATED)
+def add_user_language(
+    request: LanguageSchema,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    edu = LanguageModel(**request.dict(), user_id=user.id)
+    session.add(edu)
+    session.commit()
+    session.refresh(edu)
+
+
+@app.put("/user/language", tags=["language"])
+def edit_user_language(
+    id: int,
+    request: LanguageSchema,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    lang = (
+        session.query(LanguageModel)
+        .filter(LanguageModel.user_id == user.id)
+        .filter(LanguageModel.id == id)
+        .one_or_none()
+    )
+    if lang:
+        lang.level = request.level
+        lang.language = request.language
+        session.commit()
+        session.refresh(lang)
+        return
+
+    response.status_code = status.HTTP_404_NOT_FOUND
+
+
+@app.delete("/user/language", tags=["language"])
+def remove_user_language(
+    id: int,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    deleted = (
+        session.query(LanguageModel).filter(LanguageModel.user_id == user.id).filter(LanguageModel.id == id).delete()
+    )
+
+    if not deleted:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+
+    session.commit()
+
+
+@app.get("/user/disability", tags=["disability"], response_model=list[DisabilityDB])
+def get_user_language(user: User = Depends(fastapi_users.current_user()), session: Session = Depends(db_session)):
+    disabilities = session.query(DisabilityModel).filter(DisabilityModel.user_id == user.id).all()
+    return [DisabilityDB(id=dis.id, type=dis.type.value, level=dis.level.value) for dis in disabilities]
+
+
+@app.post("/user/disability", tags=["disability"], status_code=status.HTTP_201_CREATED)
+def add_user_language(
+    request: DisabilitySchema,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    edu = DisabilityModel(**request.dict(), user_id=user.id)
+    session.add(edu)
+    session.commit()
+    session.refresh(edu)
+
+
+@app.put("/user/disability", tags=["disability"])
+def edit_user_language(
+    id: int,
+    request: DisabilitySchema,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    dis = (
+        session.query(DisabilityModel)
+        .filter(DisabilityModel.user_id == user.id)
+        .filter(DisabilityModel.id == id)
+        .one_or_none()
+    )
+    if dis:
+        dis.level = request.level
+        dis.type = request.type
+        session.commit()
+        session.refresh(dis)
+        return
+
+    response.status_code = status.HTTP_404_NOT_FOUND
+
+
+@app.delete("/user/disability", tags=["disability"])
+def remove_user_language(
+    id: int,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    deleted = (
+        session.query(DisabilityModel)
+        .filter(DisabilityModel.user_id == user.id)
+        .filter(DisabilityModel.id == id)
+        .delete()
     )
 
     if not deleted:
