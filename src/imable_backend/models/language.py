@@ -2,7 +2,7 @@ from fastapi_users.db.sqlalchemy import GUID
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from imable_backend.schemas.language import LanguageLevel
+from ..schemas.language import LanguageLevel
 
 from .base_model import Base
 
