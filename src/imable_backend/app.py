@@ -1,11 +1,23 @@
 import os
+from typing import List
 
-from fastapi import FastAPI, Request
+from fastapi import Depends, FastAPI, Request
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
+from sqlalchemy.orm import Session
+from starlette.status import HTTP_201_CREATED
+
+from imable_backend.deps import db_session
+from imable_backend.schemas.education import EducationDB
 
 from .database.session import database, user_db
-from .schemas.user import User, UserCreate, UserUpdate, UserDB
+from .models.education import Education as EducationModel
+from .models.experience import Experience as ExperienceModel
+from .schemas.education import Education as EducationSchema
+from .schemas.education import EducationDB
+from .schemas.experience import Experience as ExperienceSchema
+from .schemas.experience import ExperienceDB
+from .schemas.user import User, UserCreate, UserDB, UserUpdate
 
 APP_SECRET = os.getenv("APP_SECRET")
 
@@ -56,3 +68,60 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
+
+
+@app.get("/user/experience", tags=["experience"], response_model=List[ExperienceDB])
+def get_user_experience(user: User = Depends(fastapi_users.current_user()), session: Session = Depends(db_session)):
+    experiences = session.query(ExperienceModel).filter(ExperienceModel.user_id == user.id).all()
+    return [
+        ExperienceDB(
+            id=exp.id,
+            position=exp.position,
+            employer=exp.employer,
+            city=exp.city,
+            start_date=exp.start_date,
+            end_date=exp.end_date,
+            description=exp.description,
+        )
+        for exp in experiences
+    ]
+
+
+@app.post("/user/experience", tags=["experience"], status_code=HTTP_201_CREATED)
+def add_user_experience(
+    request: ExperienceSchema,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    experience = ExperienceModel(**request.dict(), user_id=user.id)
+    session.add(experience)
+    session.commit()
+    session.refresh(experience)
+
+
+@app.get("/user/education", tags=["education"], response_model=List[EducationDB])
+def get_user_education(user: User = Depends(fastapi_users.current_user()), session: Session = Depends(db_session)):
+    educations = session.query(EducationModel).filter(EducationModel.user_id == user.id).all()
+    return [
+        EducationDB(
+            id=edu.id,
+            edu_type=edu.edu_type.value,
+            name=edu.name,
+            city=edu.city,
+            start_date=edu.start_date,
+            end_date=edu.end_date,
+        )
+        for edu in educations
+    ]
+
+
+@app.post("/user/education", tags=["education"], status_code=HTTP_201_CREATED)
+def add_user_education(
+    request: EducationSchema,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    edu = EducationModel(**request.dict(), user_id=user.id)
+    session.add(edu)
+    session.commit()
+    session.refresh(edu)

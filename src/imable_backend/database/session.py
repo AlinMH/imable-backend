@@ -4,9 +4,8 @@ import databases
 import sqlalchemy.orm
 from fastapi_users.db import SQLAlchemyUserDatabase
 
-from ..models.base_model import Base
-from ..models.user import UserTable
 from ..schemas.user import UserDB
+from . import UserTable
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 engine = sqlalchemy.create_engine(DATABASE_URL, pool_pre_ping=True)
