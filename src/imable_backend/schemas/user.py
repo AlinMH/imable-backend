@@ -15,6 +15,11 @@ class User(models.BaseUser):
     phone_number: constr(max_length=50, strip_whitespace=True) = None
     location: Optional[str] = None
     birthdate: Optional[date] = None
+    visual: Optional[bool] = False
+    hearing: Optional[bool] = False
+    speech_impediment: Optional[bool] = False
+    locomotor: Optional[bool] = False
+    neural: Optional[bool] = False
 
     @validator("phone_number")
     def check_phone_number(cls, v):
