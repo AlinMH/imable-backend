@@ -14,3 +14,4 @@ class UserTable(Base, SQLAlchemyBaseUserTable):
 
     experience = relationship("Experience", back_populates="user")
     education = relationship("Education", back_populates="user")
+    language = relationship("Language", back_populates="user")

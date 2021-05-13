@@ -5,22 +5,29 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
 from sqlalchemy.orm import Session
+from starlette.middleware import Middleware
 
 from .database.session import database, user_db
 from .deps import db_session
 from .models.education import Education as EducationModel
 from .models.experience import Experience as ExperienceModel
+from .models.language import Language as LanguageModel
 from .schemas.education import Education as EducationSchema
 from .schemas.education import EducationDB
 from .schemas.experience import Experience as ExperienceSchema
 from .schemas.experience import ExperienceDB
+from .schemas.language import Language as LanguageSchema
+from .schemas.language import LanguageDB
 from .schemas.user import User, UserCreate, UserDB, UserUpdate
 
 APP_SECRET = os.getenv("APP_SECRET")
 
 jwt_authentication = JWTAuthentication(secret=APP_SECRET, lifetime_seconds=3600, tokenUrl="/auth/jwt/login")
 
-app = FastAPI()
+middleware = [
+    Middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+]
+app = FastAPI(middleware=middleware)
 fastapi_users = FastAPIUsers(
     user_db,
     [jwt_authentication],
@@ -197,10 +204,61 @@ def remove_user_education(
     session.commit()
 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.get("/user/language", tags=["language"], response_model=list[LanguageDB])
+def get_user_language(user: User = Depends(fastapi_users.current_user()), session: Session = Depends(db_session)):
+    languages = session.query(LanguageModel).filter(LanguageModel.user_id == user.id).all()
+    return [LanguageDB(id=lang.id, language=lang.language, level=lang.level.value) for lang in languages]
+
+
+@app.post("/user/language", tags=["language"], status_code=status.HTTP_201_CREATED)
+def add_user_language(
+    request: LanguageSchema,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    edu = LanguageModel(**request.dict(), user_id=user.id)
+    session.add(edu)
+    session.commit()
+    session.refresh(edu)
+
+
+@app.put("/user/language", tags=["language"])
+def edit_user_language(
+    id: int,
+    request: LanguageSchema,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    lang = (
+        session.query(LanguageModel)
+        .filter(LanguageModel.user_id == user.id)
+        .filter(LanguageModel.id == id)
+        .one_or_none()
+    )
+    if lang:
+        lang.level = request.level
+        lang.language = request.language
+        session.commit()
+        session.refresh(lang)
+        return
+
+    response.status_code = status.HTTP_404_NOT_FOUND
+
+
+@app.delete("/user/language", tags=["language"])
+def remove_user_language(
+    id: int,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    deleted = (
+        session.query(LanguageModel).filter(LanguageModel.user_id == user.id).filter(LanguageModel.id == id).delete()
+    )
+
+    if not deleted:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+
+    session.commit()
