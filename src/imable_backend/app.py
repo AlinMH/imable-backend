@@ -96,6 +96,34 @@ def add_user_experience(
     session.refresh(experience)
 
 
+@app.put("/user/experience", tags=["experience"])
+def edit_user_experience(
+    id: int,
+    request: ExperienceSchema,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    experience = (
+        session.query(ExperienceModel)
+        .filter(ExperienceModel.user_id == user.id)
+        .filter(ExperienceModel.id == id)
+        .one_or_none()
+    )
+    if experience:
+        experience.position = request.position
+        experience.employer = request.employer
+        experience.city = request.city
+        experience.start_date = request.start_date
+        experience.end_date = request.end_date
+        experience.description = request.description
+        session.commit()
+        session.refresh(experience)
+        return
+
+    response.status_code = status.HTTP_404_NOT_FOUND
+
+
 @app.delete("/user/experience", tags=["experience"])
 def remove_user_experience(
     id: int,
@@ -145,6 +173,33 @@ def add_user_education(
     session.refresh(edu)
 
 
+@app.put("/user/education", tags=["education"])
+def edit_user_education(
+    id: int,
+    request: EducationSchema,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    education = (
+        session.query(EducationModel)
+        .filter(EducationModel.user_id == user.id)
+        .filter(EducationModel.id == id)
+        .one_or_none()
+    )
+    if education:
+        education.edu_type = request.edu_type
+        education.name = request.name
+        education.city = request.city
+        education.start_date = request.start_date
+        education.end_date = request.end_date
+        session.commit()
+        session.refresh(education)
+        return
+
+    response.status_code = status.HTTP_404_NOT_FOUND
+
+
 @app.delete("/user/education", tags=["education"])
 def remove_user_education(
     id: int,
@@ -153,10 +208,7 @@ def remove_user_education(
     session: Session = Depends(db_session),
 ):
     deleted = (
-        session.query(EducationModel)
-        .filter(EducationModel.user_id == user.id)
-        .filter(EducationModel.id == id)
-        .delete()
+        session.query(EducationModel).filter(EducationModel.user_id == user.id).filter(EducationModel.id == id).delete()
     )
 
     if not deleted:
