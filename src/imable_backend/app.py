@@ -24,10 +24,7 @@ APP_SECRET = os.getenv("APP_SECRET")
 
 jwt_authentication = JWTAuthentication(secret=APP_SECRET, lifetime_seconds=3600, tokenUrl="/auth/jwt/login")
 
-middleware = [
-    Middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
-]
-app = FastAPI(middleware=middleware)
+app = FastAPI()
 fastapi_users = FastAPIUsers(
     user_db,
     [jwt_authentication],
@@ -41,6 +38,9 @@ app.include_router(fastapi_users.get_register_router(), prefix="/auth", tags=["a
 app.include_router(fastapi_users.get_reset_password_router(APP_SECRET), prefix="/auth", tags=["auth"])
 app.include_router(fastapi_users.get_verify_router(APP_SECRET), prefix="/auth", tags=["auth"])
 app.include_router(fastapi_users.get_users_router(), prefix="/users", tags=["users"])
+app.add_middleware(
+    CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"]
+)
 
 
 @app.on_event("startup")
@@ -72,9 +72,9 @@ def get_user_experience(user: User = Depends(fastapi_users.current_user()), sess
 
 @app.post("/user/experience", tags=["experience"], status_code=status.HTTP_201_CREATED)
 def add_user_experience(
-    request: ExperienceSchema,
-    user: User = Depends(fastapi_users.current_user()),
-    session: Session = Depends(db_session),
+        request: ExperienceSchema,
+        user: User = Depends(fastapi_users.current_user()),
+        session: Session = Depends(db_session),
 ):
     experience = ExperienceModel(**request.dict(), user_id=user.id)
     session.add(experience)
@@ -84,17 +84,17 @@ def add_user_experience(
 
 @app.put("/user/experience", tags=["experience"])
 def edit_user_experience(
-    id: int,
-    request: ExperienceSchema,
-    response: Response,
-    user: User = Depends(fastapi_users.current_user()),
-    session: Session = Depends(db_session),
+        id: int,
+        request: ExperienceSchema,
+        response: Response,
+        user: User = Depends(fastapi_users.current_user()),
+        session: Session = Depends(db_session),
 ):
     experience = (
         session.query(ExperienceModel)
-        .filter(ExperienceModel.user_id == user.id)
-        .filter(ExperienceModel.id == id)
-        .one_or_none()
+            .filter(ExperienceModel.user_id == user.id)
+            .filter(ExperienceModel.id == id)
+            .one_or_none()
     )
     if experience:
         experience.position = request.position
@@ -112,16 +112,16 @@ def edit_user_experience(
 
 @app.delete("/user/experience", tags=["experience"])
 def remove_user_experience(
-    id: int,
-    response: Response,
-    user: User = Depends(fastapi_users.current_user()),
-    session: Session = Depends(db_session),
+        id: int,
+        response: Response,
+        user: User = Depends(fastapi_users.current_user()),
+        session: Session = Depends(db_session),
 ):
     deleted = (
         session.query(ExperienceModel)
-        .filter(ExperienceModel.user_id == user.id)
-        .filter(ExperienceModel.id == id)
-        .delete()
+            .filter(ExperienceModel.user_id == user.id)
+            .filter(ExperienceModel.id == id)
+            .delete()
     )
 
     if not deleted:
@@ -149,9 +149,9 @@ def get_user_education(user: User = Depends(fastapi_users.current_user()), sessi
 
 @app.post("/user/education", tags=["education"], status_code=status.HTTP_201_CREATED)
 def add_user_education(
-    request: EducationSchema,
-    user: User = Depends(fastapi_users.current_user()),
-    session: Session = Depends(db_session),
+        request: EducationSchema,
+        user: User = Depends(fastapi_users.current_user()),
+        session: Session = Depends(db_session),
 ):
     edu = EducationModel(**request.dict(), user_id=user.id)
     session.add(edu)
@@ -161,17 +161,17 @@ def add_user_education(
 
 @app.put("/user/education", tags=["education"])
 def edit_user_education(
-    id: int,
-    request: EducationSchema,
-    response: Response,
-    user: User = Depends(fastapi_users.current_user()),
-    session: Session = Depends(db_session),
+        id: int,
+        request: EducationSchema,
+        response: Response,
+        user: User = Depends(fastapi_users.current_user()),
+        session: Session = Depends(db_session),
 ):
     education = (
         session.query(EducationModel)
-        .filter(EducationModel.user_id == user.id)
-        .filter(EducationModel.id == id)
-        .one_or_none()
+            .filter(EducationModel.user_id == user.id)
+            .filter(EducationModel.id == id)
+            .one_or_none()
     )
     if education:
         education.edu_type = request.edu_type
@@ -188,10 +188,10 @@ def edit_user_education(
 
 @app.delete("/user/education", tags=["education"])
 def remove_user_education(
-    id: int,
-    response: Response,
-    user: User = Depends(fastapi_users.current_user()),
-    session: Session = Depends(db_session),
+        id: int,
+        response: Response,
+        user: User = Depends(fastapi_users.current_user()),
+        session: Session = Depends(db_session),
 ):
     deleted = (
         session.query(EducationModel).filter(EducationModel.user_id == user.id).filter(EducationModel.id == id).delete()
@@ -212,9 +212,9 @@ def get_user_language(user: User = Depends(fastapi_users.current_user()), sessio
 
 @app.post("/user/language", tags=["language"], status_code=status.HTTP_201_CREATED)
 def add_user_language(
-    request: LanguageSchema,
-    user: User = Depends(fastapi_users.current_user()),
-    session: Session = Depends(db_session),
+        request: LanguageSchema,
+        user: User = Depends(fastapi_users.current_user()),
+        session: Session = Depends(db_session),
 ):
     edu = LanguageModel(**request.dict(), user_id=user.id)
     session.add(edu)
@@ -224,17 +224,17 @@ def add_user_language(
 
 @app.put("/user/language", tags=["language"])
 def edit_user_language(
-    id: int,
-    request: LanguageSchema,
-    response: Response,
-    user: User = Depends(fastapi_users.current_user()),
-    session: Session = Depends(db_session),
+        id: int,
+        request: LanguageSchema,
+        response: Response,
+        user: User = Depends(fastapi_users.current_user()),
+        session: Session = Depends(db_session),
 ):
     lang = (
         session.query(LanguageModel)
-        .filter(LanguageModel.user_id == user.id)
-        .filter(LanguageModel.id == id)
-        .one_or_none()
+            .filter(LanguageModel.user_id == user.id)
+            .filter(LanguageModel.id == id)
+            .one_or_none()
     )
     if lang:
         lang.level = request.level
@@ -248,10 +248,10 @@ def edit_user_language(
 
 @app.delete("/user/language", tags=["language"])
 def remove_user_language(
-    id: int,
-    response: Response,
-    user: User = Depends(fastapi_users.current_user()),
-    session: Session = Depends(db_session),
+        id: int,
+        response: Response,
+        user: User = Depends(fastapi_users.current_user()),
+        session: Session = Depends(db_session),
 ):
     deleted = (
         session.query(LanguageModel).filter(LanguageModel.user_id == user.id).filter(LanguageModel.id == id).delete()
