@@ -1,15 +1,13 @@
 import os
-from typing import List
 
-from fastapi import Depends, FastAPI, Request, Response, status
+from fastapi import Depends, FastAPI, Response, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
 from sqlalchemy.orm import Session
-from starlette.middleware.cors import CORSMiddleware
-
-from .deps import db_session
 
 from .database.session import database, user_db
+from .deps import db_session
 from .models.education import Education as EducationModel
 from .models.experience import Experience as ExperienceModel
 from .schemas.education import Education as EducationSchema

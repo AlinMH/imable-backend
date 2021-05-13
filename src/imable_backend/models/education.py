@@ -3,7 +3,6 @@ from sqlalchemy import Column, Date, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from ..schemas.education import EduType
-
 from .base_model import Base
 
 

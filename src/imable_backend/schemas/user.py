@@ -2,18 +2,11 @@ from datetime import date
 from typing import Optional
 
 from fastapi_users import models
-from phonenumbers import (
-    NumberParseException,
-    PhoneNumberFormat,
-    PhoneNumberType,
-    format_number,
-    is_valid_number,
-    number_type,
-)
+from phonenumbers import (NumberParseException, PhoneNumberFormat,
+                          PhoneNumberType, format_number, is_valid_number,
+                          number_type)
 from phonenumbers import parse as parse_phone_number
 from pydantic import constr, validator
-
-from .experience import Experience
 
 
 class User(models.BaseUser):
@@ -42,8 +35,7 @@ class User(models.BaseUser):
 
 
 class UserCreate(models.BaseUserCreate):
-    first_name: str
-    last_name: str
+    pass
 
 
 class UserUpdate(User, models.BaseUserUpdate):

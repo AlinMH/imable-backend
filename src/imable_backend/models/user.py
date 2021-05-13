@@ -6,8 +6,8 @@ from .base_model import Base
 
 
 class UserTable(Base, SQLAlchemyBaseUserTable):
-    first_name = Column(String(length=40), nullable=False)
-    last_name = Column(String(length=40), nullable=False)
+    first_name = Column(String(length=40), nullable=True)
+    last_name = Column(String(length=40), nullable=True)
     phone_number = Column(String(length=50), nullable=True)
     location = Column(String(length=50), nullable=True)
     birthdate = Column(Date, nullable=True)
