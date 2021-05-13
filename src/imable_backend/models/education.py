@@ -2,7 +2,7 @@ from fastapi_users.db.sqlalchemy import GUID
 from sqlalchemy import Column, Date, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from imable_backend.schemas.education import EduType
+from ..schemas.education import EduType
 
 from .base_model import Base
 
