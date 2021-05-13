@@ -12,13 +12,6 @@ class UserTable(Base, SQLAlchemyBaseUserTable):
     location = Column(String(length=50), nullable=True)
     birthdate = Column(Date, nullable=True)
 
-    # Disabilities
-    visual = Column(Boolean, nullable=True)
-    hearing = Column(Boolean, nullable=True)
-    speech_impediment = Column(Boolean, nullable=True)
-    locomotor = Column(Boolean, nullable=True)
-    neural = Column(Boolean, nullable=True)
-
     # Abilities
     creativity = Column(Boolean, nullable=True)
     analytic_thinking = Column(Boolean, nullable=True)
@@ -40,3 +33,4 @@ class UserTable(Base, SQLAlchemyBaseUserTable):
     experience = relationship("Experience", back_populates="user")
     education = relationship("Education", back_populates="user")
     language = relationship("Language", back_populates="user")
+    disability = relationship("Disability", back_populates="user")

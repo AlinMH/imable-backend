@@ -16,13 +16,6 @@ class User(models.BaseUser):
     location: Optional[str] = None
     birthdate: Optional[date] = None
 
-    # Disabilities
-    visual: Optional[bool] = False
-    hearing: Optional[bool] = False
-    speech_impediment: Optional[bool] = False
-    locomotor: Optional[bool] = False
-    neural: Optional[bool] = False
-
     # Abilities
     creativity: Optional[bool] = False
     analytic_thinking: Optional[bool] = False
