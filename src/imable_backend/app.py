@@ -6,9 +6,7 @@ from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_201_CREATED
-
-from imable_backend.deps import db_session
-from imable_backend.schemas.education import EducationDB
+from .deps import db_session
 
 from .database.session import database, user_db
 from .models.education import Education as EducationModel

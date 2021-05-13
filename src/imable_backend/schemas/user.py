@@ -8,7 +8,7 @@ from phonenumbers import (NumberParseException, PhoneNumberFormat,
 from phonenumbers import parse as parse_phone_number
 from pydantic import constr, validator
 
-from imable_backend.schemas.experience import Experience
+from .experience import Experience
 
 
 class User(models.BaseUser):
