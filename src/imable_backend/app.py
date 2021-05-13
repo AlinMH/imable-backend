@@ -1,11 +1,10 @@
 import os
 from typing import List
 
-from fastapi import Depends, FastAPI, Request
+from fastapi import Depends, FastAPI, Request, Response, status
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
 from sqlalchemy.orm import Session
-from starlette.status import HTTP_201_CREATED
 from .deps import db_session
 
 from .database.session import database, user_db
@@ -68,7 +67,7 @@ async def shutdown():
     await database.disconnect()
 
 
-@app.get("/user/experience", tags=["experience"], response_model=List[ExperienceDB])
+@app.get("/user/experience", tags=["experience"], response_model=list[ExperienceDB])
 def get_user_experience(user: User = Depends(fastapi_users.current_user()), session: Session = Depends(db_session)):
     experiences = session.query(ExperienceModel).filter(ExperienceModel.user_id == user.id).all()
     return [
@@ -85,7 +84,7 @@ def get_user_experience(user: User = Depends(fastapi_users.current_user()), sess
     ]
 
 
-@app.post("/user/experience", tags=["experience"], status_code=HTTP_201_CREATED)
+@app.post("/user/experience", tags=["experience"], status_code=status.HTTP_201_CREATED)
 def add_user_experience(
     request: ExperienceSchema,
     user: User = Depends(fastapi_users.current_user()),
@@ -97,7 +96,28 @@ def add_user_experience(
     session.refresh(experience)
 
 
-@app.get("/user/education", tags=["education"], response_model=List[EducationDB])
+@app.delete("/user/experience", tags=["experience"])
+def remove_user_experience(
+    id: int,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    deleted = (
+        session.query(ExperienceModel)
+        .filter(ExperienceModel.user_id == user.id)
+        .filter(ExperienceModel.id == id)
+        .delete()
+    )
+
+    if not deleted:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+
+    session.commit()
+
+
+@app.get("/user/education", tags=["education"], response_model=list[EducationDB])
 def get_user_education(user: User = Depends(fastapi_users.current_user()), session: Session = Depends(db_session)):
     educations = session.query(EducationModel).filter(EducationModel.user_id == user.id).all()
     return [
@@ -113,7 +133,7 @@ def get_user_education(user: User = Depends(fastapi_users.current_user()), sessi
     ]
 
 
-@app.post("/user/education", tags=["education"], status_code=HTTP_201_CREATED)
+@app.post("/user/education", tags=["education"], status_code=status.HTTP_201_CREATED)
 def add_user_education(
     request: EducationSchema,
     user: User = Depends(fastapi_users.current_user()),
@@ -123,3 +143,24 @@ def add_user_education(
     session.add(edu)
     session.commit()
     session.refresh(edu)
+
+
+@app.delete("/user/education", tags=["education"])
+def remove_user_education(
+    id: int,
+    response: Response,
+    user: User = Depends(fastapi_users.current_user()),
+    session: Session = Depends(db_session),
+):
+    deleted = (
+        session.query(EducationModel)
+        .filter(EducationModel.user_id == user.id)
+        .filter(EducationModel.id == id)
+        .delete()
+    )
+
+    if not deleted:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return
+
+    session.commit()
