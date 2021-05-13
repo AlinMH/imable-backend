@@ -3,7 +3,6 @@ from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from ..schemas.language import LanguageLevel
-
 from .base_model import Base
 
 
