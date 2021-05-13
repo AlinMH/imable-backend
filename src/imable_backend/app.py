@@ -21,6 +21,14 @@ APP_SECRET = os.getenv("APP_SECRET")
 jwt_authentication = JWTAuthentication(secret=APP_SECRET, lifetime_seconds=3600, tokenUrl="/auth/jwt/login")
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 fastapi_users = FastAPIUsers(
     user_db,
     [jwt_authentication],
@@ -34,14 +42,6 @@ app.include_router(fastapi_users.get_register_router(), prefix="/auth", tags=["a
 app.include_router(fastapi_users.get_reset_password_router(APP_SECRET), prefix="/auth", tags=["auth"])
 app.include_router(fastapi_users.get_verify_router(APP_SECRET), prefix="/auth", tags=["auth"])
 app.include_router(fastapi_users.get_users_router(), prefix="/users", tags=["users"])
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 @app.on_event("startup")
