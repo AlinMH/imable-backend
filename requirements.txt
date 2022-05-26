@@ -8,7 +8,7 @@ deprecated==1.2.12; python_version >= "3.7" and python_full_version < "3.0.0" or
 dnspython==2.1.0; python_version >= "3.7"
 email-validator==1.1.2; python_version >= "3.7"
 fastapi-users==6.0.0; python_version >= "3.7"
-fastapi==0.63.0; python_version >= "3.7"
+fastapi==0.65.2; python_version >= "3.7"
 h11==0.12.0; python_version >= "3.6"
 idna==3.1; python_version >= "3.7"
 makefun==1.11.3; python_version >= "3.7"
